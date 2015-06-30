@@ -41,7 +41,7 @@
  *
  */
 
-#include <string.h>
+//#include <string.h>
 #include <stdarg.h>
 #include "mini-printf.h"
 
@@ -104,29 +104,29 @@ mini_vsnprintf(char *buffer, unsigned int buffer_len, char *fmt, va_list va)
 	char bf[24];
 	char ch;
 
-	int _putc(char ch)
-	{
-		if ((unsigned int)((pbuffer - buffer) + 1) >= buffer_len)
-			return 0;
-		*(pbuffer++) = ch;
-		*(pbuffer) = '\0';
-		return 1;
-	}
+	#define _putc(ch) do \
+	{	\
+		if ((unsigned int)((pbuffer - buffer) + 1) >= buffer_len)	\
+			return 0;	\
+		*(pbuffer++) = ch;	\
+		*(pbuffer) = '\0';	\
+		/*return 1;*/	\
+	} while(0)
 
-	int _puts(char *s, unsigned int len)
-	{
-		unsigned int i;
-
-		if (buffer_len - (pbuffer - buffer) - 1 < len)
-			len = buffer_len - (pbuffer - buffer) - 1;
-
-		/* Copy to buffer */
-		for (i = 0; i < len; i++)
-			*(pbuffer++) = s[i];
-		*(pbuffer) = '\0';
-
-		return len;
-	}
+	#define _puts(s, len) do \
+	{	\
+		unsigned int i;	\
+		\
+		if (buffer_len - (pbuffer - buffer) - 1 < len)	\
+			len = buffer_len - (pbuffer - buffer) - 1;	\
+		\
+		/* Copy to buffer */	\
+		for (i = 0; i < len; i++)	\
+			*(pbuffer++) = s[i];	\
+		*(pbuffer) = '\0';	\
+		\
+		/*return len;*/	\
+	} while(0)
 
 	while ((ch=*(fmt++))) {
 		if ((unsigned int)((pbuffer - buffer) + 1) >= buffer_len)
@@ -172,7 +172,8 @@ mini_vsnprintf(char *buffer, unsigned int buffer_len, char *fmt, va_list va)
 
 				case 's' :
 					ptr = va_arg(va, char*);
-					_puts(ptr, mini_strlen(ptr));
+					len = mini_strlen(ptr);
+					_puts(ptr, len);
 					break;
 
 				default:
